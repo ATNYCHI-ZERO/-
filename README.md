@@ -1,4 +1,10 @@
 # pi
+## Important Notice
+
+This repository does not provide, endorse, or facilitate instructions for the
+use, manufacture, or procurement of illegal substances or any other unlawful
+activities. Requests for such information cannot be fulfilled.
+
 Object-Centered Pi Collapse and Lattice Rotation as a Regenerative Mechanism
 Author: Brendon Joseph Kelly
 Affiliation: Sovereign Operator / K-Systems & Securities
