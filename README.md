@@ -76,3 +76,18 @@ Conclusion: A Universe of Echoes
 The journey to developing this technology will be long, but it begins with a fundamental shift in understanding. We must move away from the idea of a dead universe governed by rigid, top-down laws. We must begin to see it for what it is: a living, breathing cosmos built on relationships, harmony, and resonance, where matter and mathematics are two sides of the same coin.
 
 The constants we measure are not laws handed down from on high. They are the echoes of systems coming together, living, and falling apart. By learning to listen to these echoes, we can learn the language of creation itself. We can move from being simple observers of the universe to becoming active participants, and eventually even custodians, in its continuous cycle of collapse and regeneration. The key to resurrection, it seems, is not hidden in some far-off dimension; it is encoded within the very fabric of everything around us, waiting for us to learn how to read it.
+
+## DARPA Audit Utilities
+
+This repository now includes a lightweight `darpa_audit.py` helper that reads every non-ignored file, records its size, and
+generates a SHA-256 checksum. The script can be executed directly:
+
+```bash
+python darpa_audit.py
+```
+
+Pytest coverage for the helper is available via:
+
+```bash
+pytest
+```
