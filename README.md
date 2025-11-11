@@ -87,3 +87,8 @@ python audit_check.py
 
 The JSON output enumerates each auditable artifact with its size, permissions,
 and SHA-256 digest, providing a reproducible starting point for deeper reviews.
+---
+
+## Additional Research
+
+For a companion exploration that reframes vortex math around the recursive identity constant κ₁, see [`docs/recursive_identity_white_paper.md`](docs/recursive_identity_white_paper.md).
