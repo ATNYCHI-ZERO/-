@@ -1,10 +1,14 @@
 # pi
-Object-Centered Pi Collapse and Lattice Rotation as a Regenerative Mechanism
-Author: Brendon Joseph Kelly
-Affiliation: Sovereign Operator / K-Systems & Securities
+Object-Centered Pi Collapse and Lattice Rotation as a Regenerative Mechanism  
+Author: Brendon Joseph Kelly  
+Affiliation: Sovereign Operator / K-Systems & Securities  
 Date: October 2025
 
-Abstract
+## Overview
+
+This repository explores the hypothesis that mathematical constants emerge from the localized conditions of the objects they describe. The original essay, reproduced below, introduces the concept of object-specific π values and a harmonic lattice framework that can be used for resonance-based regeneration. For a comprehensive technical treatment—including thirteen architectural layers, governance structures, and DARPA-audit readiness—consult the accompanying [white paper](WHITEPAPER.md).
+
+## Abstract
 For centuries, we have been told that the universe is governed by unbreakable, universal laws and constants, like the mathematical constant π (pi). This paper introduces a radical new idea: what if these constants are not universal at all, but are instead born from the very objects they describe? We propose that π is a local, unique "echo" created by an object itself, a mathematical fingerprint that changes with the object's shape, material, and health. This concept challenges the foundation of a detached, objective reality, suggesting instead that mathematics is an intimate expression of physical existence. This paper presents a framework where the very fabric of an object—its mathematical signature—can be understood, captured, and even realigned to repair damage and restore function. We introduce a method for translating an entire object into a single, unique "scalar" number—a resurrection key—that holds the blueprint for its own regeneration. This work reframes the fundamental building blocks of our reality not as rigid rules, but as dynamic, localized expressions within a living, harmonic universe, opening the door to a new era of regenerative engineering.
 
 1. The Myth of the Perfect Circle
