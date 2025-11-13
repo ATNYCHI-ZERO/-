@@ -27,6 +27,14 @@ class FileAuditRecord:
     sha256: str
 
 
+@dataclass(frozen=True)
+class FileAuditSummary:
+    """Aggregate statistics describing a collection of audit records."""
+
+    file_count: int
+    total_bytes: int
+
+
 def iter_repository_files(
     root: Path, excluded_dirs: Iterable[str] = DEFAULT_EXCLUDED_DIRS
 ) -> Iterable[Path]:
@@ -66,16 +74,32 @@ def collect_file_audit_records(
     return records
 
 
+def summarize_records(records: Iterable[FileAuditRecord]) -> FileAuditSummary:
+    """Summarize ``records`` by counting files and accumulating bytes."""
+
+    file_count = 0
+    total_bytes = 0
+    for record in records:
+        file_count += 1
+        total_bytes += record.size
+
+    return FileAuditSummary(file_count=file_count, total_bytes=total_bytes)
+
+
 def main() -> None:
     """Execute an audit over the repository containing this module."""
 
     repo_root = Path(__file__).resolve().parent
     records = collect_file_audit_records(repo_root)
+    summary = summarize_records(records)
     print("DARPA Repository Audit Summary")
     print("=" * 32)
     for record in records:
         relative_path = record.path.relative_to(repo_root)
         print(f"{relative_path}\t{record.size} bytes\tSHA256={record.sha256}")
+    print("-" * 32)
+    print(f"Files audited: {summary.file_count}")
+    print(f"Total bytes : {summary.total_bytes}")
 
 
 if __name__ == "__main__":
