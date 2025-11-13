@@ -15,7 +15,7 @@ from typing import Iterable, List
 import hashlib
 
 
-DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
+DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__", ".pytest_cache"}
 
 
 @dataclass(frozen=True)
@@ -69,8 +69,28 @@ def collect_file_audit_records(
 def main() -> None:
     """Execute an audit over the repository containing this module."""
 
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Audit repository files by emitting their relative path, size, and SHA-256 hash."
+        )
+    )
+    parser.add_argument(
+        "--exclude",
+        "-e",
+        action="append",
+        default=[],
+        help=(
+            "Additional directory names to exclude from the audit.  The match is performed"
+            " against each path component, similar to the default exclusions."
+        ),
+    )
+    args = parser.parse_args()
+
     repo_root = Path(__file__).resolve().parent
-    records = collect_file_audit_records(repo_root)
+    excluded = set(DEFAULT_EXCLUDED_DIRS).union(args.exclude)
+    records = collect_file_audit_records(repo_root, excluded_dirs=excluded)
     print("DARPA Repository Audit Summary")
     print("=" * 32)
     for record in records:
