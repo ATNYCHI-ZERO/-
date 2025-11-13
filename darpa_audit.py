@@ -112,6 +112,7 @@ if __name__ == "__main__":  # pragma: no cover - CLI entry point
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
+import os
 import hashlib
 
 
@@ -133,18 +134,17 @@ def iter_repository_files(
     """Yield all files under ``root`` excluding the specified directories."""
 
     excluded = {d for d in excluded_dirs}
-    for path in sorted(root.rglob("*")):
-        if path.is_dir():
-            if path.name in excluded:
-                # Skip exploring this directory entirely by continuing; rglob
-                # has already yielded the directory so we simply ignore it.
-                continue
-            continue
+    for current_root, dirnames, filenames in os.walk(root):
+        # Mutate ``dirnames`` in-place so ``os.walk`` will skip excluded
+        # directories entirely instead of traversing into them and their
+        # descendants.  This mirrors the behaviour callers expect from the
+        # public API and avoids scanning large directories such as ``.git``.
+        dirnames[:] = [name for name in dirnames if name not in excluded]
 
-        if any(part in excluded for part in path.parts):
-            continue
-
-        yield path
+        current_path = Path(current_root)
+        for filename in sorted(filenames):
+            candidate = current_path / filename
+            yield candidate
 
 
 def _stream_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
