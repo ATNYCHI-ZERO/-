@@ -1,0 +1,17 @@
+{
+  "generated_at": "2025-11-10T23:42:59.758482Z",
+  "repository_root": "/workspace/-",
+  "file_count": 2,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "be544bc1c6f460301f7d385a22febf2ff5fe1df0ed709107c550db27531a5275",
+      "size_bytes": 13124
+    },
+    {
+      "path": "darpa_audit.py",
+      "sha256": "a203d5518cddee54fe29efdeebb36b7a1a8ad0857cca81e4d5bd374e8f8792d1",
+      "size_bytes": 2948
+    }
+  ]
+}
