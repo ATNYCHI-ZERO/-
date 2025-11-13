@@ -11,6 +11,10 @@ import pytest
             pathlib.Path("docs/recursive_identity_white_paper.md"),
             "Recursive Identity and the Collapse of Vortex Symbolism into k₁",
         ),
+        (
+            pathlib.Path("docs/bitcoin_internet_currency_white_paper.md"),
+            "Bitcoin as the Native Currency of the Internet",
+        ),
     ],
 )
 def test_document_headers(path: pathlib.Path, expected_title: str) -> None:
