@@ -33,18 +33,34 @@ def iter_repository_files(
     """Yield all files under ``root`` excluding the specified directories."""
 
     excluded = {d for d in excluded_dirs}
-    for path in sorted(root.rglob("*")):
-        if path.is_dir():
-            if path.name in excluded:
-                # Skip exploring this directory entirely by continuing; rglob
-                # has already yielded the directory so we simply ignore it.
+
+    def walk(directory: Path) -> Iterable[Path]:
+        for entry in sorted(directory.iterdir()):
+            # If the entry itself is an excluded directory, skip traversing it
+            # entirely.  This avoids touching large directories (such as
+            # ``.git``) that are irrelevant to the audit while keeping the
+            # function deterministic for callers.
+            if entry.is_dir():
+                if entry.name in excluded:
+                    continue
+                yield from walk(entry)
                 continue
-            continue
 
-        if any(part in excluded for part in path.parts):
-            continue
+            # Skip files that live inside an excluded directory.  This guards
+            # against symbolic links or other edge cases where ``entry`` is a
+            # file but one of its parents should be ignored.
+            if any(part in excluded for part in entry.parts):
+                continue
 
-        yield path
+            yield entry
+
+    if root.is_file():
+        if any(part in excluded for part in root.parts):
+            return
+        yield root
+        return
+
+    yield from walk(root)
 
 
 def build_file_audit(path: Path) -> FileAuditRecord:
