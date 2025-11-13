@@ -10,9 +10,10 @@ external dependencies.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import os
 from pathlib import Path
 from typing import Iterable, List
-import hashlib
 
 
 DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
@@ -28,11 +29,12 @@ class FileAuditRecord:
 
 
 def iter_repository_files(
-    root: Path, excluded_dirs: Iterable[str] = DEFAULT_EXCLUDED_DIRS
+    root: Path,
+    excluded_dirs: Iterable[os.PathLike[str] | str] = DEFAULT_EXCLUDED_DIRS,
 ) -> Iterable[Path]:
     """Yield all files under ``root`` excluding the specified directories."""
 
-    excluded = {d for d in excluded_dirs}
+    excluded = {os.fspath(d) for d in excluded_dirs}
     for path in sorted(root.rglob("*")):
         if path.is_dir():
             if path.name in excluded:
@@ -56,7 +58,8 @@ def build_file_audit(path: Path) -> FileAuditRecord:
 
 
 def collect_file_audit_records(
-    root: Path, excluded_dirs: Iterable[str] = DEFAULT_EXCLUDED_DIRS
+    root: Path,
+    excluded_dirs: Iterable[os.PathLike[str] | str] = DEFAULT_EXCLUDED_DIRS,
 ) -> List[FileAuditRecord]:
     """Collect audit records for each relevant file in ``root``."""
 
