@@ -92,6 +92,9 @@ generates a SHA-256 checksum. The script can be executed directly:
 python darpa_audit.py
 ```
 
+For a fully formalized description of the Unified Systemic Execution Architecture, including executable reference code for each
+subsystem, consult `docs/unified_systemic_execution_architecture.md`.
+
 Pytest coverage for the helper is available via:
 
 ```bash
