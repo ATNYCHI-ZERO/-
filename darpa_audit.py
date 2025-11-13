@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 import hashlib
+import os
 
 
 DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
@@ -33,18 +34,20 @@ def iter_repository_files(
     """Yield all files under ``root`` excluding the specified directories."""
 
     excluded = {d for d in excluded_dirs}
-    for path in sorted(root.rglob("*")):
-        if path.is_dir():
-            if path.name in excluded:
-                # Skip exploring this directory entirely by continuing; rglob
-                # has already yielded the directory so we simply ignore it.
+    for current_dir, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            d for d in dirnames if d not in excluded and not d.startswith(".")
+        )
+
+        for filename in sorted(filenames):
+            if filename.startswith("."):
                 continue
-            continue
 
-        if any(part in excluded for part in path.parts):
-            continue
+            path = Path(current_dir) / filename
+            if any(part in excluded for part in path.relative_to(root).parts):
+                continue
 
-        yield path
+            yield path
 
 
 def build_file_audit(path: Path) -> FileAuditRecord:
