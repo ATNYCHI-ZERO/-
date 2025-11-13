@@ -47,12 +47,22 @@ def iter_repository_files(
         yield path
 
 
+def _compute_sha256(path: Path, chunk_size: int = 65_536) -> str:
+    """Return the SHA-256 digest for ``path`` using a streaming reader."""
+
+    hasher = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(chunk_size), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
 def build_file_audit(path: Path) -> FileAuditRecord:
     """Construct a :class:`FileAuditRecord` for ``path``."""
 
-    data = path.read_bytes()
-    digest = hashlib.sha256(data).hexdigest()
-    return FileAuditRecord(path=path, size=len(data), sha256=digest)
+    digest = _compute_sha256(path)
+    size = path.stat().st_size
+    return FileAuditRecord(path=path, size=size, sha256=digest)
 
 
 def collect_file_audit_records(
