@@ -76,3 +76,12 @@ Conclusion: A Universe of Echoes
 The journey to developing this technology will be long, but it begins with a fundamental shift in understanding. We must move away from the idea of a dead universe governed by rigid, top-down laws. We must begin to see it for what it is: a living, breathing cosmos built on relationships, harmony, and resonance, where matter and mathematics are two sides of the same coin.
 
 The constants we measure are not laws handed down from on high. They are the echoes of systems coming together, living, and falling apart. By learning to listen to these echoes, we can learn the language of creation itself. We can move from being simple observers of the universe to becoming active participants, and eventually even custodians, in its continuous cycle of collapse and regeneration. The key to resurrection, it seems, is not hidden in some far-off dimension; it is encoded within the very fabric of everything around us, waiting for us to learn how to read it.
+
+## Sierra Chart Implementation
+
+The `src/AntonioSierraRecursiveAlgo.cpp` file contains a Sierra Chart study implementation of the "Antonio Sierra Recursive Strategy." The study applies ATR-driven risk controls, optional re-entry gating after stop-outs, and persistence keys to manage open position state within Sierra Chart's AutoLoop execution model. Compile the study with the Sierra Chart Advanced Custom Study Interface and Language (ACSIL) build tools before loading it on a chart. Inputs exposed through the Sierra Chart interface include:
+
+- **Enable Trading** – master toggle to activate live order placement.
+- **Maximum Stop Distance (% of price)** – caps trades whose ATR-derived stop would exceed the specified percentage of the current price.
+- **ATR Multiplier for Stop** – scales the ATR value for stop-loss and profit-target calculations.
+- **Allow Reentry After Stop** – requires the market to break the prior stop-out level before re-entering when disabled.
