@@ -92,6 +92,15 @@ generates a SHA-256 checksum. The script can be executed directly:
 python darpa_audit.py
 ```
 
+Additional CLI options support deeper sweeps and machine readable output:
+
+* ``--include-hidden`` – hash dot-prefixed files such as ``.env`` or
+  ``.github``.
+* ``--root <path>`` – point the audit at any directory (defaults to the
+  repository containing ``darpa_audit.py``).
+* ``--format json`` – emit structured JSON if another system needs to ingest the
+  report.
+
 Pytest coverage for the helper is available via:
 
 ```bash
