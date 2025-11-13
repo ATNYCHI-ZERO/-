@@ -15,7 +15,7 @@ from typing import Iterable, List
 import hashlib
 
 
-DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
+DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__", ".pytest_cache"}
 
 
 @dataclass(frozen=True)
