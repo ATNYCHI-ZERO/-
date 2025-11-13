@@ -1,4 +1,7 @@
 # pi
+
+For foundational mathematics, see [WHITE_PAPER.md](WHITE_PAPER.md).
+
 Object-Centered Pi Collapse and Lattice Rotation as a Regenerative Mechanism
 Author: Brendon Joseph Kelly
 Affiliation: Sovereign Operator / K-Systems & Securities
