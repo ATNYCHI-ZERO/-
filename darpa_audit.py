@@ -13,6 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
 import hashlib
+import os
+
+
+_DEFAULT_HASH_CHUNK_SIZE = 1024 * 1024  # 1 MiB
 
 
 DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
@@ -33,26 +37,37 @@ def iter_repository_files(
     """Yield all files under ``root`` excluding the specified directories."""
 
     excluded = {d for d in excluded_dirs}
-    for path in sorted(root.rglob("*")):
-        if path.is_dir():
-            if path.name in excluded:
-                # Skip exploring this directory entirely by continuing; rglob
-                # has already yielded the directory so we simply ignore it.
+    root = root.resolve()
+    for current_dir, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(d for d in dirnames if d not in excluded)
+
+        for filename in sorted(filenames):
+            path = Path(current_dir) / filename
+            relative_parts = path.relative_to(root).parts
+            if any(part in excluded for part in relative_parts):
                 continue
-            continue
+            yield path
 
-        if any(part in excluded for part in path.parts):
-            continue
 
-        yield path
+def _sha256_digest(path: Path, chunk_size: int = _DEFAULT_HASH_CHUNK_SIZE) -> str:
+    """Stream ``path`` and return its SHA-256 digest."""
+
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while True:
+            chunk = handle.read(chunk_size)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def build_file_audit(path: Path) -> FileAuditRecord:
     """Construct a :class:`FileAuditRecord` for ``path``."""
 
-    data = path.read_bytes()
-    digest = hashlib.sha256(data).hexdigest()
-    return FileAuditRecord(path=path, size=len(data), sha256=digest)
+    size = path.stat().st_size
+    digest = _sha256_digest(path)
+    return FileAuditRecord(path=path, size=size, sha256=digest)
 
 
 def collect_file_audit_records(
