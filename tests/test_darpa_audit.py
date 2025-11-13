@@ -16,3 +16,15 @@ def test_collect_file_audit_records_includes_readme():
     assert readme, "README.md should be discovered during the audit"
     assert readme[0].size > 0
     assert len(readme[0].sha256) == 64
+
+
+def test_collect_file_audit_records_excludes_pytest_cache():
+    records = collect_file_audit_records(repo_root)
+
+    pytest_cache = [
+        record
+        for record in records
+        if ".pytest_cache" in record.path.parts
+    ]
+
+    assert not pytest_cache, "The .pytest_cache directory should be excluded from audits"
