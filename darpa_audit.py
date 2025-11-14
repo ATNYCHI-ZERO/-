@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -103,11 +103,7 @@ def _build_report_payload(
         "repository_root": str(root),
         "file_count": len(records),
         "files": [
-            {
-                "path": str(record.path.relative_to(root)),
-                "size_bytes": record.size,
-                "sha256": record.sha256,
-            }
+            _record_to_dict(record, root=root)
             for record in records
         ],
     }
@@ -117,6 +113,28 @@ def _write_report(payload: dict, output: Path) -> None:
     """Persist the audit ``payload`` to ``output`` in JSON format."""
 
     output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _record_to_dict(
+    record: FileAuditRecord, *, root: Path | None = None
+) -> dict:
+    """Convert ``record`` into a plain serialisable dictionary."""
+
+    path = record.path
+    if root is not None:
+        try:
+            path = path.relative_to(root)
+        except ValueError:
+            # ``record`` may refer to a file outside ``root`` (unlikely but
+            # possible when the caller provides a mismatched path).  In that
+            # case we emit the absolute path to avoid raising.
+            pass
+
+    return {
+        "path": str(path),
+        "size_bytes": record.size,
+        "sha256": record.sha256,
+    }
 
 
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -143,7 +161,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    print(
+        json.dumps(
+            [_record_to_dict(record, root=args.root) for record in records],
+            indent=2,
+        )
+    )
     return 0
 
 
