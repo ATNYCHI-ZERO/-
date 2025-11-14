@@ -143,7 +143,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    cli_records = [
+        {
+            **asdict(record),
+            "path": str(record.path.relative_to(args.root)),
+        }
+        for record in records
+    ]
+    print(json.dumps(cli_records, indent=2))
     return 0
 
 
