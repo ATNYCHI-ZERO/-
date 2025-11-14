@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -93,6 +93,32 @@ def collect_file_audit_records(
     return records
 
 
+def _normalise_path(path: Path, root: Path | None = None) -> str:
+    """Return ``path`` relative to ``root`` when possible."""
+
+    if root is not None:
+        try:
+            path = path.relative_to(root)
+        except ValueError:
+            pass
+    return str(path)
+
+
+def _record_to_mapping(
+    record: FileAuditRecord,
+    *,
+    root: Path | None = None,
+    size_key: str = "size_bytes",
+) -> dict:
+    """Convert ``record`` into a JSON-serialisable mapping."""
+
+    return {
+        "path": _normalise_path(record.path, root),
+        size_key: record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _build_report_payload(
     root: Path, records: Sequence[FileAuditRecord]
 ) -> dict:
@@ -103,11 +129,7 @@ def _build_report_payload(
         "repository_root": str(root),
         "file_count": len(records),
         "files": [
-            {
-                "path": str(record.path.relative_to(root)),
-                "size_bytes": record.size,
-                "sha256": record.sha256,
-            }
+            _record_to_mapping(record, root=root, size_key="size_bytes")
             for record in records
         ],
     }
@@ -143,7 +165,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    print(
+        json.dumps(
+            [
+                _record_to_mapping(
+                    record,
+                    root=args.root,
+                    size_key="size",
+                )
+                for record in records
+            ],
+            indent=2,
+        )
+    )
     return 0
 
 
