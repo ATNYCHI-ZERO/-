@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -143,7 +143,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+
+    def _serialise_record(record: FileAuditRecord) -> dict:
+        try:
+            relative_path = record.path.relative_to(args.root)
+        except ValueError:
+            relative_path = record.path
+        return {
+            "path": str(relative_path),
+            "size": record.size,
+            "sha256": record.sha256,
+        }
+
+    print(json.dumps([_serialise_record(record) for record in records], indent=2))
     return 0
 
 
