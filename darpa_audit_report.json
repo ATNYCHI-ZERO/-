@@ -1,7 +1,7 @@
 {
-  "generated_at": "2025-11-14T08:02:14.939576Z",
+  "generated_at": "2025-11-14T20:56:23.705703Z",
   "repository_root": "/workspace/-",
-  "file_count": 31,
+  "file_count": 30,
   "files": [
     {
       "path": "AUDIT.md",
@@ -110,13 +110,8 @@
     },
     {
       "path": "darpa_audit.py",
-      "size_bytes": 4871,
-      "sha256": "199ae1b20853a979b53f118d56a756e36d2e7a30aedbca388bdcb43c165fcd91"
-    },
-    {
-      "path": "darpa_audit_report.json",
-      "size_bytes": 5295,
-      "sha256": "19df3207bb2d3c68f9cbb0146d8a5eb9b65eeda4f31a1158da266dbb8790165b"
+      "size_bytes": 4994,
+      "sha256": "992dc22785f3d5ba261adba8fae702207c96944043ea3110f5e8a8ece52ba543"
     },
     {
       "path": "docs/recursive_identity_white_paper.md",
@@ -140,8 +135,8 @@
     },
     {
       "path": "tests/test_darpa_audit.py",
-      "size_bytes": 1424,
-      "sha256": "d47dc98cd042d2b0e8dd386294fa1ed55fab7e840bc2bb043e6abdbc3a878be3"
+      "size_bytes": 932,
+      "sha256": "154d79d07d43952812d0397accd3660fc08d9061718f70b6966e5e3793bb86db"
     },
     {
       "path": "tests/test_documents.py",

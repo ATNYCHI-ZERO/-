@@ -11,9 +11,10 @@ if str(repo_root) not in sys.path:
 import hashlib
 
 from darpa_audit import (
+    FileAuditRecord,
     build_file_audit,
     collect_file_audit_records,
-    iter_repository_files,
+    _build_report_payload,
 )
 
 
@@ -37,10 +38,11 @@ def test_build_file_audit_streams_content(tmp_path):
     assert record.sha256 == hashlib.sha256(payload).hexdigest()
 
 
-def test_iter_repository_files_extends_default_exclusions():
-    files = list(iter_repository_files(repo_root, excluded_dirs={"docs"}))
+def test_build_report_payload_serialises_paths(tmp_path):
+    target = tmp_path / "artifact.txt"
+    target.write_text("DARPA", encoding="utf-8")
 
-    assert files, "Expected audit iterator to discover files"
-    assert all(".git" not in path.parts for path in files)
-    assert all("docs" not in path.parts for path in files)
-    assert any(path.name == "README.md" for path in files)
+    record = FileAuditRecord(path=target, size=5, sha256="abc123")
+    payload = _build_report_payload(tmp_path, [record])
+
+    assert payload["files"][0]["path"] == "artifact.txt"

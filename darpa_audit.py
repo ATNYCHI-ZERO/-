@@ -95,6 +95,26 @@ def collect_file_audit_records(
     return records
 
 
+def _record_to_mapping(record: FileAuditRecord, root: Path | None = None) -> dict:
+    """Convert a :class:`FileAuditRecord` into a JSON friendly mapping."""
+
+    path = record.path
+    if root is not None:
+        try:
+            path = path.relative_to(root)
+        except ValueError:
+            # ``record.path`` may fall outside ``root`` if custom iterators are
+            # supplied during testing.  Fall back to the absolute path so the
+            # caller still receives a meaningful location string.
+            path = path.resolve()
+
+    return {
+        "path": str(path),
+        "size_bytes": record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _build_report_payload(
     root: Path, records: Sequence[FileAuditRecord]
 ) -> dict:
@@ -104,14 +124,7 @@ def _build_report_payload(
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
-        "files": [
-            {
-                "path": str(record.path.relative_to(root)),
-                "size_bytes": record.size,
-                "sha256": record.sha256,
-            }
-            for record in records
-        ],
+        "files": [_record_to_mapping(record, root) for record in records],
     }
 
 
@@ -177,7 +190,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([_record_to_json_ready(record) for record in records], indent=2))
+    print(json.dumps([_record_to_mapping(record) for record in records], indent=2))
     return 0
 
 
