@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -52,7 +52,7 @@ def iter_repository_files(
     if excluded_dirs is None:
         excluded = DEFAULT_EXCLUDED_DIRS
     else:
-        excluded = set(excluded_dirs)
+        excluded = DEFAULT_EXCLUDED_DIRS | set(excluded_dirs)
 
     for path in sorted(root.rglob("*")):
         if not path.is_file():
@@ -113,6 +113,16 @@ def _build_report_payload(
     }
 
 
+def _record_to_json_ready(record: FileAuditRecord) -> dict:
+    """Render ``record`` into a structure that ``json.dumps`` can serialise."""
+
+    return {
+        "path": str(record.path),
+        "size": record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _write_report(payload: dict, output: Path) -> None:
     """Persist the audit ``payload`` to ``output`` in JSON format."""
 
@@ -133,6 +143,16 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
     )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=None,
+        metavar="DIR",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to ignore several directories."
+        ),
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -140,10 +160,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
+    records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    print(json.dumps([_record_to_json_ready(record) for record in records], indent=2))
     return 0
 
 
