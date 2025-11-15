@@ -11,6 +11,10 @@ import pytest
             pathlib.Path("docs/recursive_identity_white_paper.md"),
             "Recursive Identity and the Collapse of Vortex Symbolism into k₁",
         ),
+        (
+            pathlib.Path("docs/united_states_doctrine_of_accountability.md"),
+            "UNITED STATES DOCTRINE OF ACCOUNTABILITY",
+        ),
     ],
 )
 def test_document_headers(path: pathlib.Path, expected_title: str) -> None:

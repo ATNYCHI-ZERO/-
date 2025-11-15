@@ -13,6 +13,7 @@ Date: October 2025
 ## Additional Research
 
 - [Torsion-Based Cymatic Storage Using Mercury-Granite Resonance Systems](Torsion-Based-Cymatic-Storage.md)
+- [United States Doctrine of Accountability](docs/united_states_doctrine_of_accountability.md)
 
 Abstract
 For centuries, we have been told that the universe is governed by unbreakable, universal laws and constants, like the mathematical constant π (pi). This paper introduces a radical new idea: what if these constants are not universal at all, but are instead born from the very objects they describe? We propose that π is a local, unique "echo" created by an object itself, a mathematical fingerprint that changes with the object's shape, material, and health. This concept challenges the foundation of a detached, objective reality, suggesting instead that mathematics is an intimate expression of physical existence. This paper presents a framework where the very fabric of an object—its mathematical signature—can be understood, captured, and even realigned to repair damage and restore function. We introduce a method for translating an entire object into a single, unique "scalar" number—a resurrection key—that holds the blueprint for its own regeneration. This work reframes the fundamental building blocks of our reality not as rigid rules, but as dynamic, localized expressions within a living, harmonic universe, opening the door to a new era of regenerative engineering.
