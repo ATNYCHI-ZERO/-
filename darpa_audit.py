@@ -46,13 +46,15 @@ def iter_repository_files(
     """Yield files underneath ``root`` while skipping ``excluded_dirs``.
 
     The returned iterator yields paths in sorted order so the output is stable
-    across runs, simplifying downstream comparisons and tests.
+    across runs, simplifying downstream comparisons and tests.  ``excluded_dirs``
+    augments :data:`DEFAULT_EXCLUDED_DIRS` rather than replacing it so that the
+    standard ignore set continues to apply when callers provide additional
+    filters.
     """
 
-    if excluded_dirs is None:
-        excluded = DEFAULT_EXCLUDED_DIRS
-    else:
-        excluded = DEFAULT_EXCLUDED_DIRS | set(excluded_dirs)
+    excluded = set(DEFAULT_EXCLUDED_DIRS)
+    if excluded_dirs is not None:
+        excluded.update(excluded_dirs)
 
     for path in sorted(root.rglob("*")):
         if not path.is_file():
