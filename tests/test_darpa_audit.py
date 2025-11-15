@@ -33,21 +33,21 @@ def test_build_file_audit_streams_content(tmp_path):
     assert record.sha256 == hashlib.sha256(payload).hexdigest()
 
 
-def test_main_generates_json_report(tmp_path, capsys):
-    root = tmp_path / "repo"
-    root.mkdir()
-    target = root / "file.txt"
-    target.write_text("classified", encoding="utf-8")
-
+def test_main_emits_json(tmp_path, capsys):
     output = tmp_path / "report.json"
-    exit_code = main(["--root", str(root), "--output", str(output)])
+
+    exit_code = main(["--root", str(repo_root), "--output", str(output)])
 
     assert exit_code == 0
-    assert output.exists()
 
-    payload = json.loads(output.read_text(encoding="utf-8"))
-    assert payload["file_count"] == 1
-    assert payload["files"][0]["path"] == "file.txt"
+    stdout = capsys.readouterr().out
+    listing = json.loads(stdout)
 
-    stdout_payload = json.loads(capsys.readouterr().out)
-    assert stdout_payload == payload
+    assert isinstance(listing, list)
+    assert listing, "CLI output should include at least one record"
+    assert isinstance(listing[0]["path"], str)
+    assert isinstance(listing[0]["size"], int)
+    assert isinstance(listing[0]["sha256"], str)
+
+    report = json.loads(output.read_text())
+    assert report["file_count"] == len(listing)

@@ -95,22 +95,28 @@ def collect_file_audit_records(
     return records
 
 
-def _record_to_mapping(record: FileAuditRecord, root: Path | None = None) -> dict:
-    """Convert a :class:`FileAuditRecord` into a JSON friendly mapping."""
+def _normalise_path(path: Path, root: Path | None = None) -> str:
+    """Return ``path`` relative to ``root`` when possible."""
 
-    path = record.path
     if root is not None:
         try:
             path = path.relative_to(root)
         except ValueError:
-            # ``record.path`` may fall outside ``root`` if custom iterators are
-            # supplied during testing.  Fall back to the absolute path so the
-            # caller still receives a meaningful location string.
-            path = path.resolve()
+            pass
+    return str(path)
+
+
+def _record_to_mapping(
+    record: FileAuditRecord,
+    *,
+    root: Path | None = None,
+    size_key: str = "size_bytes",
+) -> dict:
+    """Convert ``record`` into a JSON-serialisable mapping."""
 
     return {
-        "path": str(path),
-        "size_bytes": record.size,
+        "path": _normalise_path(record.path, root),
+        size_key: record.size,
         "sha256": record.sha256,
     }
 
@@ -124,17 +130,10 @@ def _build_report_payload(
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
-        "files": [_record_to_mapping(record, root) for record in records],
-    }
-
-
-def _record_to_json_ready(record: FileAuditRecord) -> dict:
-    """Render ``record`` into a structure that ``json.dumps`` can serialise."""
-
-    return {
-        "path": str(record.path),
-        "size": record.size,
-        "sha256": record.sha256,
+        "files": [
+            _record_to_mapping(record, root=root, size_key="size_bytes")
+            for record in records
+        ],
     }
 
 
@@ -190,7 +189,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps(payload, indent=2))
+    print(
+        json.dumps(
+            [
+                _record_to_mapping(
+                    record,
+                    root=args.root,
+                    size_key="size",
+                )
+                for record in records
+            ],
+            indent=2,
+        )
+    )
     return 0
 
 
