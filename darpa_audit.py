@@ -46,13 +46,15 @@ def iter_repository_files(
     """Yield files underneath ``root`` while skipping ``excluded_dirs``.
 
     The returned iterator yields paths in sorted order so the output is stable
-    across runs, simplifying downstream comparisons and tests.
+    across runs, simplifying downstream comparisons and tests.  ``excluded_dirs``
+    augments :data:`DEFAULT_EXCLUDED_DIRS` rather than replacing it so that the
+    standard ignore set continues to apply when callers provide additional
+    filters.
     """
 
-    if excluded_dirs is None:
-        excluded = DEFAULT_EXCLUDED_DIRS
-    else:
-        excluded = set(excluded_dirs)
+    excluded = set(DEFAULT_EXCLUDED_DIRS)
+    if excluded_dirs is not None:
+        excluded.update(excluded_dirs)
 
     for path in sorted(root.rglob("*")):
         if not path.is_file():
@@ -93,6 +95,26 @@ def collect_file_audit_records(
     return records
 
 
+def _record_to_mapping(record: FileAuditRecord, root: Path | None = None) -> dict:
+    """Convert a :class:`FileAuditRecord` into a JSON friendly mapping."""
+
+    path = record.path
+    if root is not None:
+        try:
+            path = path.relative_to(root)
+        except ValueError:
+            # ``record.path`` may fall outside ``root`` if custom iterators are
+            # supplied during testing.  Fall back to the absolute path so the
+            # caller still receives a meaningful location string.
+            path = path.resolve()
+
+    return {
+        "path": str(path),
+        "size_bytes": record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _build_report_payload(
     root: Path, records: Sequence[FileAuditRecord]
 ) -> dict:
@@ -102,14 +124,17 @@ def _build_report_payload(
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
-        "files": [
-            {
-                "path": str(record.path.relative_to(root)),
-                "size_bytes": record.size,
-                "sha256": record.sha256,
-            }
-            for record in records
-        ],
+        "files": [_record_to_mapping(record, root) for record in records],
+    }
+
+
+def _record_to_json_ready(record: FileAuditRecord) -> dict:
+    """Render ``record`` into a structure that ``json.dumps`` can serialise."""
+
+    return {
+        "path": str(record.path),
+        "size": record.size,
+        "sha256": record.sha256,
     }
 
 
@@ -133,14 +158,36 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
     )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=None,
+        metavar="DIR",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to ignore several directories."
+        ),
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
+
+
+def _serialise_record(record: FileAuditRecord, root: Path) -> dict:
+    """Convert ``record`` into a JSON-friendly mapping."""
+
+    payload = asdict(record)
+    try:
+        relative = record.path.relative_to(root)
+    except ValueError:
+        relative = record.path
+    payload["path"] = str(relative)
+    return payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
+    records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
     serialisable_records = [
