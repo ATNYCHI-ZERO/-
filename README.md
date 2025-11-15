@@ -12,6 +12,7 @@ Date: October 2025
 
 ## Additional Research
 
+- [Project Prometheus: Final Unification Briefing](docs/project_prometheus_briefing.md)
 - [Torsion-Based Cymatic Storage Using Mercury-Granite Resonance Systems](Torsion-Based-Cymatic-Storage.md)
 
 Abstract
