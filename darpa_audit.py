@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -132,6 +132,16 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to extend the default ignore list."
+        ),
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 
