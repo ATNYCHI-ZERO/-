@@ -154,15 +154,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root, excluded_dirs=excluded_dirs)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    printable_records = [
-        {
-            "path": str(record.path),
+
+    def _serialise_record(record: FileAuditRecord) -> dict:
+        try:
+            relative_path = record.path.relative_to(args.root)
+        except ValueError:
+            relative_path = record.path
+        return {
+            "path": str(relative_path),
             "size": record.size,
             "sha256": record.sha256,
         }
-        for record in records
-    ]
-    print(json.dumps(printable_records, indent=2))
+
+    print(json.dumps([_serialise_record(record) for record in records], indent=2))
     return 0
 
 
