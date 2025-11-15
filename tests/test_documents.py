@@ -12,8 +12,8 @@ import pytest
             "Recursive Identity and the Collapse of Vortex Symbolism into k₁",
         ),
         (
-            pathlib.Path("docs/united_states_doctrine_of_accountability.md"),
-            "UNITED STATES DOCTRINE OF ACCOUNTABILITY",
+            pathlib.Path("docs/project_prometheus_briefing.md"),
+            "Project Prometheus: Final Unification Briefing",
         ),
     ],
 )
