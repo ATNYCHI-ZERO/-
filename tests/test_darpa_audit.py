@@ -8,7 +8,12 @@ if str(repo_root) not in sys.path:
 
 import hashlib
 
-from darpa_audit import build_file_audit, collect_file_audit_records
+from darpa_audit import (
+    FileAuditRecord,
+    build_file_audit,
+    collect_file_audit_records,
+    _build_report_payload,
+)
 
 
 def test_collect_file_audit_records_includes_readme():
@@ -29,3 +34,13 @@ def test_build_file_audit_streams_content(tmp_path):
 
     assert record.size == len(payload)
     assert record.sha256 == hashlib.sha256(payload).hexdigest()
+
+
+def test_build_report_payload_serialises_paths(tmp_path):
+    target = tmp_path / "artifact.txt"
+    target.write_text("DARPA", encoding="utf-8")
+
+    record = FileAuditRecord(path=target, size=5, sha256="abc123")
+    payload = _build_report_payload(tmp_path, [record])
+
+    assert payload["files"][0]["path"] == "artifact.txt"
