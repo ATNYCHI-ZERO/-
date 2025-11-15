@@ -190,15 +190,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    serialisable_records = [
-        {
-            "path": str(record.path),
-            "size": record.size,
-            "sha256": record.sha256,
-        }
-        for record in records
-    ]
-    print(json.dumps(serialisable_records, indent=2))
+    print(json.dumps(payload["files"], indent=2))
     return 0
 
 
