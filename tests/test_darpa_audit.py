@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import sys
 
@@ -8,7 +9,7 @@ if str(repo_root) not in sys.path:
 
 import hashlib
 
-from darpa_audit import build_file_audit, collect_file_audit_records
+from darpa_audit import build_file_audit, collect_file_audit_records, main
 
 
 def test_collect_file_audit_records_includes_readme():
@@ -29,3 +30,17 @@ def test_build_file_audit_streams_content(tmp_path):
 
     assert record.size == len(payload)
     assert record.sha256 == hashlib.sha256(payload).hexdigest()
+
+
+def test_cli_serialises_paths(tmp_path, capsys):
+    output = tmp_path / "report.json"
+
+    exit_code = main(["--root", str(repo_root), "--output", str(output)])
+
+    assert exit_code == 0
+    stdout = capsys.readouterr().out
+    entries = json.loads(stdout)
+    assert entries, "CLI should emit at least one record"
+    assert isinstance(entries[0]["path"], str)
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["file_count"] == len(entries)
