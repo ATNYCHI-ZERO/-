@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -133,6 +133,16 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
     )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to extend the default ignore list."
+        ),
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -140,10 +150,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
+    excluded_dirs = DEFAULT_EXCLUDED_DIRS.union(args.exclude)
+    records = collect_file_audit_records(args.root, excluded_dirs=excluded_dirs)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    printable_records = [
+        {
+            "path": str(record.path),
+            "size": record.size,
+            "sha256": record.sha256,
+        }
+        for record in records
+    ]
+    print(json.dumps(printable_records, indent=2))
     return 0
 
 
