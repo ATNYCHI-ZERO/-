@@ -46,13 +46,15 @@ def iter_repository_files(
     """Yield files underneath ``root`` while skipping ``excluded_dirs``.
 
     The returned iterator yields paths in sorted order so the output is stable
-    across runs, simplifying downstream comparisons and tests.
+    across runs, simplifying downstream comparisons and tests.  ``excluded_dirs``
+    augments :data:`DEFAULT_EXCLUDED_DIRS` rather than replacing it so that the
+    standard ignore set continues to apply when callers provide additional
+    filters.
     """
 
-    if excluded_dirs is None:
-        excluded = DEFAULT_EXCLUDED_DIRS
-    else:
-        excluded = set(excluded_dirs)
+    excluded = set(DEFAULT_EXCLUDED_DIRS)
+    if excluded_dirs is not None:
+        excluded.update(excluded_dirs)
 
     for path in sorted(root.rglob("*")):
         if not path.is_file():
@@ -155,14 +157,36 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
     )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=None,
+        metavar="DIR",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to ignore several directories."
+        ),
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
+
+
+def _serialise_record(record: FileAuditRecord, root: Path) -> dict:
+    """Convert ``record`` into a JSON-friendly mapping."""
+
+    payload = asdict(record)
+    try:
+        relative = record.path.relative_to(root)
+    except ValueError:
+        relative = record.path
+    payload["path"] = str(relative)
+    return payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
+    records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
     print(
