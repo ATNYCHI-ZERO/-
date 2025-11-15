@@ -136,14 +136,28 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
+def _serialise_record(record: FileAuditRecord, root: Path) -> dict:
+    """Convert ``record`` into a JSON-friendly mapping."""
+
+    payload = asdict(record)
+    try:
+        relative = record.path.relative_to(root)
+    except ValueError:
+        relative = record.path
+    payload["path"] = str(relative)
+    return payload
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
-    payload = _build_report_payload(args.root, records)
+    root = args.root.resolve()
+    records = collect_file_audit_records(root)
+    payload = _build_report_payload(root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    serialised = [_serialise_record(record, root) for record in records]
+    print(json.dumps(serialised, indent=2))
     return 0
 
 
