@@ -1,5 +1,5 @@
 import json
-import hashlib
+from pathlib import Path
 import sys
 from pathlib import Path
 
@@ -7,6 +7,8 @@ from pathlib import Path
 repo_root = Path(__file__).resolve().parents[1]
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
+
+import hashlib
 
 from darpa_audit import build_file_audit, collect_file_audit_records, main
 
@@ -31,19 +33,21 @@ def test_build_file_audit_streams_content(tmp_path):
     assert record.sha256 == hashlib.sha256(payload).hexdigest()
 
 
-def test_cli_output_is_valid_json(tmp_path, capsys):
-    report_path = tmp_path / "report.json"
+def test_main_generates_json_report(tmp_path, capsys):
+    root = tmp_path / "repo"
+    root.mkdir()
+    target = root / "file.txt"
+    target.write_text("classified", encoding="utf-8")
 
-    exit_code = main(["--output", str(report_path), "--root", str(repo_root)])
+    output = tmp_path / "report.json"
+    exit_code = main(["--root", str(root), "--output", str(output)])
 
     assert exit_code == 0
+    assert output.exists()
 
-    stdout = capsys.readouterr().out
-    files_payload = json.loads(stdout)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["file_count"] == 1
+    assert payload["files"][0]["path"] == "file.txt"
 
-    assert files_payload, "CLI should emit at least one file record"
-    assert all("path" in entry and isinstance(entry["path"], str) for entry in files_payload)
-
-    report_payload = json.loads(report_path.read_text())
-
-    assert report_payload["file_count"] == len(files_payload)
+    stdout_payload = json.loads(capsys.readouterr().out)
+    assert stdout_payload == payload
