@@ -1,30 +1,25 @@
 #!/usr/bin/env python3
-"""DARPA audit utility for verifying repository files are readable.
+"""Lightweight repository audit helpers.
 
-This tool walks the repository tree, skipping common virtual environment
-and VCS directories, and records a SHA-256 digest for each file.  The
-report is written to ``darpa_audit_report.json`` in the repository root
-and printed to stdout so auditors can confirm the inventory.
-"""Utilities for auditing repository files.
-
-This module exposes helpers that read every non-ignored file inside the
-repository and surface basic metadata such as the file size and SHA-256 hash.
-The helpers are intentionally lightweight so that they can be executed in
-restricted environments (such as an automated DARPA-style audit) without
-external dependencies.
+The functions exposed by this module are intentionally small and dependency
+free so they can be executed in constrained environments (for example a DARPA
+style audit runner).  They walk the repository tree, skipping common tooling
+artifacts, and compute SHA-256 digests for each discovered file.  The module
+also provides a tiny CLI that emits the inventory as JSON.
 """
 
 from __future__ import annotations
 
 import argparse
 import datetime as _dt
-import json
-from pathlib import Path
-import sys
-from typing import Iterable, List
 import hashlib
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, List, Sequence, Set
 
-SKIP_DIRS = {
+# Directories that should be ignored when crawling the repository.
+DEFAULT_EXCLUDED_DIRS: Set[str] = {
     ".git",
     "__pycache__",
     ".mypy_cache",
@@ -33,94 +28,12 @@ SKIP_DIRS = {
     ".venv",
 }
 
-
-def iter_repo_files(root: Path) -> Iterable[Path]:
-    """Yield all files under *root* excluding skipped directories."""
-
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-        if any(part in SKIP_DIRS for part in path.parts):
-            continue
-        yield path
-
-
-def hash_file(path: Path) -> str:
-    """Return the SHA-256 digest for *path* as a hex string."""
-
-    digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def build_report(root: Path) -> List[dict]:
-    """Construct the audit report data structure for the repository."""
-
-    report_entries: List[dict] = []
-    for file_path in sorted(iter_repo_files(root)):
-        report_entries.append(
-            {
-                "path": str(file_path.relative_to(root)),
-                "sha256": hash_file(file_path),
-                "size_bytes": file_path.stat().st_size,
-            }
-        )
-    return report_entries
-
-
-def write_report(root: Path, report_data: List[dict], *, output: Path) -> None:
-    """Write *report_data* to *output* in JSON format."""
-
-    payload = {
-        "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
-        "repository_root": str(root),
-        "file_count": len(report_data),
-        "files": report_data,
-    }
-    output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-
-
-
-def parse_args(argv: Iterable[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("darpa_audit_report.json"),
-        help="Where to write the audit report (default: %(default)s)",
-    )
-    return parser.parse_args(list(argv))
-
-
-
-def main(argv: Iterable[str]) -> int:
-    args = parse_args(argv)
-    repo_root = Path(__file__).resolve().parent
-    report = build_report(repo_root)
-    write_report(repo_root, report, output=args.output)
-    print(
-        f"DARPA audit report generated for {len(report)} file(s).\n"
-        f"Report saved to {args.output}"
-    )
-    return 0
-
-
-if __name__ == "__main__":  # pragma: no cover - CLI entry point
-    raise SystemExit(main(sys.argv[1:]))
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Iterable, List
-import hashlib
-
-
-DEFAULT_EXCLUDED_DIRS = {".git", "__pycache__"}
+_CHUNK_SIZE = 1024 * 1024  # 1 MiB
 
 
 @dataclass(frozen=True)
 class FileAuditRecord:
-    """Represents a successfully audited repository file."""
+    """Snapshot describing a single audited file."""
 
     path: Path
     size: int
@@ -128,26 +41,30 @@ class FileAuditRecord:
 
 
 def iter_repository_files(
-    root: Path, excluded_dirs: Iterable[str] = DEFAULT_EXCLUDED_DIRS
+    root: Path, excluded_dirs: Iterable[str] | None = None
 ) -> Iterable[Path]:
-    """Yield all files under ``root`` excluding the specified directories."""
+    """Yield files underneath ``root`` while skipping ``excluded_dirs``.
 
-    excluded = {d for d in excluded_dirs}
+    The returned iterator yields paths in sorted order so the output is stable
+    across runs, simplifying downstream comparisons and tests.  ``excluded_dirs``
+    augments :data:`DEFAULT_EXCLUDED_DIRS` rather than replacing it so that the
+    standard ignore set continues to apply when callers provide additional
+    filters.
+    """
+
+    excluded = set(DEFAULT_EXCLUDED_DIRS)
+    if excluded_dirs is not None:
+        excluded.update(excluded_dirs)
+
     for path in sorted(root.rglob("*")):
-        if path.is_dir():
-            if path.name in excluded:
-                # Skip exploring this directory entirely by continuing; rglob
-                # has already yielded the directory so we simply ignore it.
-                continue
+        if not path.is_file():
             continue
-
         if any(part in excluded for part in path.parts):
             continue
-
         yield path
 
 
-def _stream_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
+def _stream_sha256(path: Path, chunk_size: int = _CHUNK_SIZE) -> str:
     """Compute the SHA-256 digest for ``path`` without loading it entirely."""
 
     digest = hashlib.sha256()
@@ -158,17 +75,19 @@ def _stream_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
 
 
 def build_file_audit(path: Path) -> FileAuditRecord:
-    """Construct a :class:`FileAuditRecord` for ``path`` using streaming IO."""
+    """Construct a :class:`FileAuditRecord` describing ``path``."""
 
-    size = path.stat().st_size
-    digest = _stream_sha256(path)
-    return FileAuditRecord(path=path, size=size, sha256=digest)
+    return FileAuditRecord(
+        path=path,
+        size=path.stat().st_size,
+        sha256=_stream_sha256(path),
+    )
 
 
 def collect_file_audit_records(
-    root: Path, excluded_dirs: Iterable[str] = DEFAULT_EXCLUDED_DIRS
+    root: Path, excluded_dirs: Iterable[str] | None = None
 ) -> List[FileAuditRecord]:
-    """Collect audit records for each relevant file in ``root``."""
+    """Collect audit records for every qualifying file in ``root``."""
 
     records: List[FileAuditRecord] = []
     for file_path in iter_repository_files(root, excluded_dirs=excluded_dirs):
@@ -176,17 +95,115 @@ def collect_file_audit_records(
     return records
 
 
-def main() -> None:
-    """Execute an audit over the repository containing this module."""
+def _normalise_path(path: Path, root: Path | None = None) -> str:
+    """Return ``path`` relative to ``root`` when possible."""
 
-    repo_root = Path(__file__).resolve().parent
-    records = collect_file_audit_records(repo_root)
-    print("DARPA Repository Audit Summary")
-    print("=" * 32)
-    for record in records:
-        relative_path = record.path.relative_to(repo_root)
-        print(f"{relative_path}\t{record.size} bytes\tSHA256={record.sha256}")
+    if root is not None:
+        try:
+            path = path.relative_to(root)
+        except ValueError:
+            pass
+    return str(path)
 
 
-if __name__ == "__main__":
-    main()
+def _record_to_mapping(
+    record: FileAuditRecord,
+    *,
+    root: Path | None = None,
+    size_key: str = "size_bytes",
+) -> dict:
+    """Convert ``record`` into a JSON-serialisable mapping."""
+
+    return {
+        "path": _normalise_path(record.path, root),
+        size_key: record.size,
+        "sha256": record.sha256,
+    }
+
+
+def _build_report_payload(
+    root: Path, records: Sequence[FileAuditRecord]
+) -> dict:
+    """Convert ``records`` into a JSON serialisable payload."""
+
+    return {
+        "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "repository_root": str(root),
+        "file_count": len(records),
+        "files": [
+            _record_to_mapping(record, root=root, size_key="size_bytes")
+            for record in records
+        ],
+    }
+
+
+def _write_report(payload: dict, output: Path) -> None:
+    """Persist the audit ``payload`` to ``output`` in JSON format."""
+
+    output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("darpa_audit_report.json"),
+        help="Where to write the generated report (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path(__file__).resolve().parent,
+        help="Repository root to audit (default: module directory)",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=None,
+        metavar="DIR",
+        help=(
+            "Directory name to exclude from the audit. Can be provided multiple "
+            "times to ignore several directories."
+        ),
+    )
+    return parser.parse_args(list(argv) if argv is not None else None)
+
+
+def _serialise_record(record: FileAuditRecord, root: Path) -> dict:
+    """Convert ``record`` into a JSON-friendly mapping."""
+
+    payload = asdict(record)
+    try:
+        relative = record.path.relative_to(root)
+    except ValueError:
+        relative = record.path
+    payload["path"] = str(relative)
+    return payload
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Entry-point for the command line interface."""
+
+    args = _parse_args(argv)
+    records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
+    payload = _build_report_payload(args.root, records)
+    _write_report(payload, args.output)
+    print(
+        json.dumps(
+            [
+                _record_to_mapping(
+                    record,
+                    root=args.root,
+                    size_key="size",
+                )
+                for record in records
+            ],
+            indent=2,
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entry point
+    raise SystemExit(main())
