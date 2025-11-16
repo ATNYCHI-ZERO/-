@@ -1,0 +1,157 @@
+{
+  "generated_at": "2025-11-14T20:56:23.705703Z",
+  "repository_root": "/workspace/-",
+  "file_count": 30,
+  "files": [
+    {
+      "path": "AUDIT.md",
+      "size_bytes": 1593,
+      "sha256": "ce23c073a0ad4936bbfd5f9549042db582e18c1d9ee6fdaddc014c34e320d57a"
+    },
+    {
+      "path": "AUDIT_REPORT.md",
+      "size_bytes": 2647,
+      "sha256": "ed51aab826fbae4ec45cc42b32ad1ef0309d6de787864eeb3531e614597a440d"
+    },
+    {
+      "path": "Branch of Unified AI Framework Requested_",
+      "size_bytes": 386536,
+      "sha256": "de5609497813b5b437a01952580eec083641736cc2cf06dc8f2bef154e80ab83"
+    },
+    {
+      "path": "Chapter One_ K-Math Foundations (1)",
+      "size_bytes": 265228,
+      "sha256": "33f45fdd644b1c84d02941fecb39818496187d97d9f5b60d255b0480d38d7f95"
+    },
+    {
+      "path": "DARPA_AUDIT.md",
+      "size_bytes": 1191,
+      "sha256": "f516fec5ae85ca821eeedf775736a1fb4c897454004d665a8ec868693a1cd9af"
+    },
+    {
+      "path": "Gemini_Generated_Image_jr8et4jr8et4jr8e.png",
+      "size_bytes": 1745702,
+      "sha256": "1c52331e445d2f8b25e4e2bf32861ebead984dbd4d562fe2fe07542ed1c083d7"
+    },
+    {
+      "path": "Genesis Declaration_ Sovereign Blueprint Activated_",
+      "size_bytes": 564356,
+      "sha256": "bfb0ca3293c704890d04fd70e1a45bd77b4ee768609855a751aa032eca6b583c"
+    },
+    {
+      "path": "Genesis Declaration_ Sovereign Blueprint Activated_ (1)",
+      "size_bytes": 564356,
+      "sha256": "bfb0ca3293c704890d04fd70e1a45bd77b4ee768609855a751aa032eca6b583c"
+    },
+    {
+      "path": "Identifying Brendon Kelly's Achievements",
+      "size_bytes": 525124,
+      "sha256": "3eac4e0e764c358df8d573821e0de691e9a334dee2c5df186c3934fccad94c05"
+    },
+    {
+      "path": "K-Systems Grand Unification Theory_ (1)",
+      "size_bytes": 609766,
+      "sha256": "f7db3ebe0771b6b367414727be5f1ecca222f9e4022ce4144d2101ae72cef455"
+    },
+    {
+      "path": "NeuroClear-1_whitepaper.md",
+      "size_bytes": 8872,
+      "sha256": "436501cbaa1c2e56eeb98f39d6110ca822be3d8b16b9119b33bbcfaf0d318aa0"
+    },
+    {
+      "path": "OSI_SYMBOLIC_SEAL.md",
+      "size_bytes": 4345,
+      "sha256": "5dd4bbc8f92b4a2410775b2642291f7d39d187d32b592f3b4f3d696361d1d8fd"
+    },
+    {
+      "path": "OSI_White_Paper.md",
+      "size_bytes": 4157,
+      "sha256": "19a31a64bc51e8191d394c641fd53c9ad1e3a06889759535924ea2b55123eff2"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 219902,
+      "sha256": "586b10170cd83ecb9fe5d55e33b66b6665ff5df95d49cec6ce675b8819224002"
+    },
+    {
+      "path": "RESPONSE.md",
+      "size_bytes": 376,
+      "sha256": "d4e0fab54b8976e02d2d16bcc43fb84405a4e85fb6eee823ecd7fd9253eb995f"
+    },
+    {
+      "path": "Torsion-Based-Cymatic-Storage.md",
+      "size_bytes": 4312,
+      "sha256": "679895097622a550734dad66c4f446cd87830a8885db20eb29602993b938f999"
+    },
+    {
+      "path": "UNIFIED_BLOCK.txt",
+      "size_bytes": 13927,
+      "sha256": "48b9deb502be7c9e274a5696fb1f53b9eaaa73bb025a2af6ab06c6ccdb98c6ce"
+    },
+    {
+      "path": "Unified AI Framework Requested_",
+      "size_bytes": 958815,
+      "sha256": "343032f3d2943d413058ed2c1d25ec1b33da0920c45d63532644a5e73eb67ebb"
+    },
+    {
+      "path": "[White Paper] Collapse of SHA-256 via K-Mathematic....docx",
+      "size_bytes": 13254,
+      "sha256": "a5a74ddca931dc711d6639718e86712f47d19cd672ef9c5387e21b3585a190b1"
+    },
+    {
+      "path": "audit_check.py",
+      "size_bytes": 2369,
+      "sha256": "9bc6238a1edf8d72b14866f10bb32c86e3c6c4263618abc32e4ce59898b4b34a"
+    },
+    {
+      "path": "audit_report.md",
+      "size_bytes": 3227,
+      "sha256": "4d0e99db8082bc02be6a9d39ae5fa96e3a00849761ac2244470a34bddaa6dcc0"
+    },
+    {
+      "path": "darpa_audit.py",
+      "size_bytes": 4994,
+      "sha256": "992dc22785f3d5ba261adba8fae702207c96944043ea3110f5e8a8ece52ba543"
+    },
+    {
+      "path": "docs/recursive_identity_white_paper.md",
+      "size_bytes": 4746,
+      "sha256": "859dce45adef408b0675b8b55832b05c67bcfda8dae67f5a7ffa8724e903b89a"
+    },
+    {
+      "path": "generate_whitepaper.py",
+      "size_bytes": 10276,
+      "sha256": "dc9f4be70cd5f7e384c8bf7b2ea5f47c7010e39d0661b83dfe9aff29bad72fc1"
+    },
+    {
+      "path": "requirements.txt",
+      "size_bytes": 12,
+      "sha256": "5b49270ddf945ae086dbe082903120016d71df0dc50f58907c43e7e5149aafdc"
+    },
+    {
+      "path": "scroll_executor.py",
+      "size_bytes": 2657,
+      "sha256": "54525f722248608f615e7ebdf7be48675ac5fb2b8cefe80487b6b36d63a011bf"
+    },
+    {
+      "path": "tests/test_darpa_audit.py",
+      "size_bytes": 932,
+      "sha256": "154d79d07d43952812d0397accd3660fc08d9061718f70b6966e5e3793bb86db"
+    },
+    {
+      "path": "tests/test_documents.py",
+      "size_bytes": 637,
+      "sha256": "7fe3547d5cb5ca8bc022d176e0e739e7ff0c80dfd11209d9aa52af8f4d62447d"
+    },
+    {
+      "path": "tests/test_generate_whitepaper.py",
+      "size_bytes": 880,
+      "sha256": "ad46435183a086ff3a91f8e1df24588d44f550f699c162aab87ac9a59b9f0a9e"
+    },
+    {
+      "path": "unified_whitepaper.md",
+      "size_bytes": 6897,
+      "sha256": "0a2d054cacb6a04c45b27be1b817f28025817e94e4bc07563f4aeefaf61d24fa"
+    }
+  ]
+}
