@@ -1,0 +1,94 @@
+Copy-paste block: **Golden Dome 22.5° Phase-Shift Constellation Spec (LEO)**
+
+```
+TITLE: Golden Dome (GD) 22.5° Satellite Lattice — 16-sector (π/8) geometry
+
+GEOMETRY
+- Sectoring: 22.5° (π/8), 16 surface sectors (S0..S15) around Earth.
+- Orbital phasing: satellites in each plane spaced by 22.5° true-anomaly; adjacent planes RAAN-stepped by 22.5°; inter-plane in-track phase offset = 22.5° (interleaved ground tracks).
+- Addressing: NodeID = P{plane_index}_K{slot_index}; SectorID = S{⌊(lon + 180)/22.5⌋ mod 16}.
+
+ORBITAL CONSTANTS
+- μ (Earth GM) = 3.986004418e14 m^3/s^2
+- R_E (mean)   = 6378.137 km
+
+BASELINE LEO OPTIONS (Walker-delta notation: Walker(t / p / f))
+1) GD-64  = Walker(64 / 4 / 4), h=600 km, i=53°
+   - Planes p=4, sats/plane=16, RAAN step=22.5°
+   - RAAN list (deg): [0.0, 22.5, 45.0, 67.5]
+   - In-plane phasing f=4 (slot shift = (f * t/p) mod 16 = 4)
+   - Semi-major axis a ≈ 6978 km; Period T ≈ 96 min; Ground-track speed ≈ 7.5 km/s
+
+2) GD-96  = Walker(96 / 6 / 6), h=800 km, i=70°
+   - Planes p=6, sats/plane=16, RAAN step=22.5°
+   - RAAN list (deg): [0.0, 22.5, 45.0, 67.5, 90.0, 112.5]
+   - f=6; a ≈ 7178 km; T ≈ 100.5 min
+
+3) GD-128 = Walker(128 / 8 / 8), h=1000 km, i=86° (near-polar)
+   - Planes p=8, sats/plane=16, RAAN step=22.5°
+   - RAAN list (deg): [0.0, 22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5]
+   - f=8; a ≈ 7378 km; T ≈ 105 min
+
+COVERAGE & SCHEDULING
+- Each plane: 16 satellites at ν_k = k·22.5° (k=0..15).
+- Inter-plane offset: Δν_plane = 22.5° → nodes interleave; revisit gaps minimized within each 22.5° surface sector.
+- Sector servicing rule: when sub-satellite longitude ∈ [22.5°·n−180, 22.5°·(n+1)−180), task SectorID = Sn.
+
+LINK ARCHITECTURE
+- ISL: 4 per satellite (fore/aft intra-plane + 2 cross-plane to nearest neighbors with ±22.5° RAAN).
+- Suggested: optical ISLs for backbone; Ka-band downlink; S/X-band TT&C.
+- Frequency reuse: 16-color scheme, one color per surface sector S0..S15; beams re-used every 22.5°.
+- Pointing: gimballed phased arrays; per-beam EIRP sized for edge-of-sector (worst-case slant).
+
+BEAM TILING (per satellite at service time)
+- Primary footprint: elliptical cell centered on sub-satellite point; major axis aligned with ground-track.
+- Sub-beams: 4–8 tiles per sector pass; reuse color = SectorID to avoid co-channel with neighbors.
+- Handovers at sector boundaries every ~22.5° longitude or per slant-range threshold.
+
+MINIMUM LINK-BUDGET PLACEHOLDER (to be refined)
+- Downlink (Ka-band example): 
+  TX EIRP ≈ 60–68 dBW; slant range 1200–3000 km; Rx G/T (user) ≈ 10–18 dB/K; R ≈ 100–1000 Mbps; 
+  Margins (rain, pointing, scintillation) ≥ 3–5 dB.
+- Optical ISL:
+  10–40 Gbps; BER ≤ 1e-9 with FEC; acquisition via ephemeris + beacon; 2-axis fine steering.
+
+TIMING & TIMEBASE
+- Constellation epoch aligned so plane 0, slot 0 crosses lon = 0° at t0.
+- Plane j RAAN = j·22.5°; slot shift = (f·j) mod 16.
+- Sync: GNSS disciplined; inter-sat PTP over ISL for μs-level TDMA slots.
+
+NETWORKING
+- Node addressing:  (plane j, slot k) → 16-ary code: j∈[0..p−1], k∈[0..15]
+- Routing: deterministic ring-plus-chord over ISLs; sector-aware shortest-path (DAG per epoch).
+- QoS: sector class (S0..S15) maps to priority queues; handover-aware buffering.
+
+“SCHUMANN GRID” INTERFACE (engineering interpretation)
+- Use the 22.5° surface lattice purely as fixed geodetic sampling nodes for ELF/ULF sensing experiments; 
+  any ELF work must remain compliant with spectrum/EMC standards. RF communications remain in licensed bands.
+- Scheduling: when a satellite passes within Δlat ≤ 3°, Δlon ≤ 3° of a sector grid node, flag a measurement window.
+
+OPERATIONS
+- Control: upload plane-wise; sector rotation calendar repeats every 16 longitude sectors (~1 Earth rotation).
+- Fault tolerance: if any sat is lost, re-color its sector to neighbor plane with +22.5° phase to preserve reuse plan.
+- De-orbit: drag-sail sized for 5–7 year LEO residency compliance at given altitude.
+
+DELIVERABLE TABLES
+
+A) RAAN TABLES (deg)
+- GD-64 :  [0, 22.5, 45, 67.5]
+- GD-96 :  [0, 22.5, 45, 67.5, 90, 112.5]
+- GD-128:  [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5]
+
+B) IN-PLANE SLOTS (true-anomaly, deg)
+- All configs: K = 16 slots → {0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5}
+
+C) WALKER MAPPING (slot offset)
+- Slot(k, plane j) = (k + f·j) mod 16   with f = {4,6,8} for GD-64/96/128 respectively.
+
+D) QUICK PERIOD ESTIMATES
+- h=600 km  → T ≈ 96.0 min
+- h=800 km  → T ≈ 100.5 min
+- h=1000 km → T ≈ 105.0 min
+```
+
+If you want, I can generate CSVs for plane/slot/epoch positions (one file per config), plus a sectorized frequency plan (16-color map) and a first-pass link-budget sheet for Ka downlink and optical ISLs.
