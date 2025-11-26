@@ -49,10 +49,9 @@ def iter_repository_files(
     across runs, simplifying downstream comparisons and tests.
     """
 
-    if excluded_dirs is None:
-        excluded = DEFAULT_EXCLUDED_DIRS
-    else:
-        excluded = set(excluded_dirs)
+    excluded = set(DEFAULT_EXCLUDED_DIRS)
+    if excluded_dirs is not None:
+        excluded.update(excluded_dirs)
 
     for path in sorted(root.rglob("*")):
         if not path.is_file():
@@ -133,6 +132,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path(__file__).resolve().parent,
         help="Repository root to audit (default: module directory)",
     )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=None,
+        help=(
+            "Directory names to skip during the audit. "
+            "Can be provided multiple times."
+        ),
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -140,7 +148,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry-point for the command line interface."""
 
     args = _parse_args(argv)
-    records = collect_file_audit_records(args.root)
+    records = collect_file_audit_records(args.root, excluded_dirs=args.exclude)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
     print(json.dumps([asdict(record) for record in records], indent=2))
