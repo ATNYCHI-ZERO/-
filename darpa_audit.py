@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -96,29 +96,15 @@ def collect_file_audit_records(
 
 
 def _normalise_path(path: Path, root: Path | None = None) -> str:
-    """Return ``path`` relative to ``root`` when possible."""
+    """Return a POSIX-style string for ``path`` relative to ``root`` when possible."""
 
+    resolved_path = path.resolve()
     if root is not None:
         try:
-            path = path.relative_to(root)
+            resolved_path = resolved_path.relative_to(root.resolve())
         except ValueError:
             pass
-    return str(path)
-
-
-def _record_to_mapping(
-    record: FileAuditRecord,
-    *,
-    root: Path | None = None,
-    size_key: str = "size_bytes",
-) -> dict:
-    """Convert ``record`` into a JSON-serialisable mapping."""
-
-    return {
-        "path": _normalise_path(record.path, root),
-        size_key: record.size,
-        "sha256": record.sha256,
-    }
+    return resolved_path.as_posix()
 
 
 def _build_report_payload(
@@ -131,7 +117,7 @@ def _build_report_payload(
         "repository_root": str(root),
         "file_count": len(records),
         "files": [
-            _record_to_mapping(record, root=root, size_key="size_bytes")
+            _serialise_record(record, root=root, size_key="size_bytes")
             for record in records
         ],
     }
@@ -170,15 +156,15 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
-def _serialise_record(record: FileAuditRecord, root: Path) -> dict:
+def _serialise_record(
+    record: FileAuditRecord, *, root: Path, size_key: str = "size"
+) -> dict:
     """Convert ``record`` into a JSON-friendly mapping."""
 
     payload = asdict(record)
-    try:
-        relative = record.path.relative_to(root)
-    except ValueError:
-        relative = record.path
-    payload["path"] = str(relative)
+    payload["path"] = _normalise_path(record.path, root)
+    if size_key != "size":
+        payload[size_key] = payload.pop("size")
     return payload
 
 
@@ -191,14 +177,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     _write_report(payload, args.output)
     print(
         json.dumps(
-            [
-                _record_to_mapping(
-                    record,
-                    root=args.root,
-                    size_key="size",
-                )
-                for record in records
-            ],
+            [_serialise_record(record, root=args.root) for record in records],
             indent=2,
         )
     )
