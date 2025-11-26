@@ -50,7 +50,16 @@ class AuditReport:
 
 
 def iter_repo_files(root: Path) -> Iterable[Path]:
-    for path in root.rglob("*"):
+    """Yield repository files in a stable, deterministic order.
+
+    The function walks the ``root`` tree, skipping hidden files and directories
+    (other than ``.gitignore``) and returns paths sorted lexicographically.  A
+    stable ordering makes it easier to diff audit results across runs and
+    improves test reliability.
+    """
+
+    candidates = sorted(root.rglob("*"))
+    for path in candidates:
         if not path.is_file():
             continue
         if any(part.startswith(".") and part != ".gitignore" for part in path.relative_to(root).parts):
