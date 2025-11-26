@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -93,6 +93,16 @@ def collect_file_audit_records(
     return records
 
 
+def _record_to_dict(root: Path, record: FileAuditRecord) -> dict:
+    """Return a JSON-serialisable mapping describing ``record``."""
+
+    return {
+        "path": str(record.path.relative_to(root)),
+        "size_bytes": record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _build_report_payload(
     root: Path, records: Sequence[FileAuditRecord]
 ) -> dict:
@@ -102,14 +112,7 @@ def _build_report_payload(
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
-        "files": [
-            {
-                "path": str(record.path.relative_to(root)),
-                "size_bytes": record.size,
-                "sha256": record.sha256,
-            }
-            for record in records
-        ],
+        "files": [_record_to_dict(root, record) for record in records],
     }
 
 
@@ -143,7 +146,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    print(json.dumps([_record_to_dict(args.root, record) for record in records], indent=2))
     return 0
 
 
