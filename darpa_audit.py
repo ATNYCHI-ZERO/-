@@ -98,10 +98,13 @@ def _build_report_payload(
 ) -> dict:
     """Convert ``records`` into a JSON serialisable payload."""
 
+    total_size = sum(record.size for record in records)
+
     return {
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
+        "total_size_bytes": total_size,
         "files": [
             {
                 "path": str(record.path.relative_to(root)),
