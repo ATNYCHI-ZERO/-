@@ -14,7 +14,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Sequence, Set
 
@@ -93,6 +93,30 @@ def collect_file_audit_records(
     return records
 
 
+def _record_to_json(record: FileAuditRecord, root: Path | None = None) -> dict:
+    """Return a JSON-friendly representation of ``record``.
+
+    ``dataclasses.asdict`` leaves :class:`pathlib.Path` objects untouched which
+    prevents ``json.dumps`` from serialising the structure.  The helper keeps
+    paths stable by rendering them relative to ``root`` when supplied, falling
+    back to the absolute path otherwise.
+    """
+
+    if root is not None:
+        try:
+            path_str = str(record.path.relative_to(root))
+        except ValueError:
+            path_str = str(record.path)
+    else:
+        path_str = str(record.path)
+
+    return {
+        "path": path_str,
+        "size": record.size,
+        "sha256": record.sha256,
+    }
+
+
 def _build_report_payload(
     root: Path, records: Sequence[FileAuditRecord]
 ) -> dict:
@@ -143,7 +167,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     records = collect_file_audit_records(args.root)
     payload = _build_report_payload(args.root, records)
     _write_report(payload, args.output)
-    print(json.dumps([asdict(record) for record in records], indent=2))
+    print(
+        json.dumps(
+            [_record_to_json(record, root=args.root) for record in records],
+            indent=2,
+        )
+    )
     return 0
 
 
