@@ -98,10 +98,13 @@ def _build_report_payload(
 ) -> dict:
     """Convert ``records`` into a JSON serialisable payload."""
 
+    digest = compute_repository_digest(records, root=root)
+
     return {
         "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
         "repository_root": str(root),
         "file_count": len(records),
+        "repository_digest": digest,
         "files": [
             {
                 "path": str(record.path.relative_to(root)),
@@ -111,6 +114,34 @@ def _build_report_payload(
             for record in records
         ],
     }
+
+
+def compute_repository_digest(
+    records: Sequence[FileAuditRecord], *, root: Path | None = None
+) -> str:
+    """Derive a deterministic digest for the repository snapshot.
+
+    The function combines the per-file SHA-256 digests in sorted order and
+    returns a SHA-256 checksum of that stream.  Sorting is performed using the
+    file paths relative to ``root`` (if supplied) so the resulting hash is
+    stable regardless of whether absolute or relative paths were recorded.
+    """
+
+    digest = hashlib.sha256()
+
+    def _key(record: FileAuditRecord) -> str:
+        if root is not None:
+            try:
+                return str(record.path.relative_to(root))
+            except ValueError:
+                pass
+        return str(record.path)
+
+    for record in sorted(records, key=_key):
+        digest.update(_key(record).encode("utf-8"))
+        digest.update(record.sha256.encode("utf-8"))
+
+    return digest.hexdigest()
 
 
 def _write_report(payload: dict, output: Path) -> None:
