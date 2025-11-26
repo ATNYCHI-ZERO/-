@@ -22,6 +22,7 @@ from typing import Iterable, List
 
 ROOT = Path(__file__).resolve().parent
 EXCLUDE_DIRS = {".git", "__pycache__"}
+_CHUNK_SIZE = 1024 * 1024  # 1 MiB
 
 
 @dataclass
@@ -53,13 +54,15 @@ def file_report(path: Path) -> FileReport:
     if not stat.S_ISREG(stat_result.st_mode):
         raise ValueError(f"Audit encountered non-regular file: {path}")
 
+    digest = hashlib.sha256()
     with path.open("rb") as handle:
-        digest = hashlib.sha256(handle.read()).hexdigest()
+        for chunk in iter(lambda: handle.read(_CHUNK_SIZE), b""):
+            digest.update(chunk)
 
     return FileReport(
         path=str(path.relative_to(ROOT)),
         size=stat_result.st_size,
-        sha256=digest,
+        sha256=digest.hexdigest(),
         mode=stat.filemode(stat_result.st_mode),
     )
 
