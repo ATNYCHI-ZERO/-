@@ -1,7 +1,7 @@
 {
-  "generated_at": "2025-11-14T20:56:23.705703Z",
-  "repository_root": "/workspace/-",
-  "file_count": 30,
+  "generated_at": "2025-11-27T04:49:20.449942Z",
+  "repository_root": ".",
+  "file_count": 40,
   "files": [
     {
       "path": "AUDIT.md",
@@ -27,6 +27,16 @@
       "path": "DARPA_AUDIT.md",
       "size_bytes": 1191,
       "sha256": "f516fec5ae85ca821eeedf775736a1fb4c897454004d665a8ec868693a1cd9af"
+    },
+    {
+      "path": "GOV",
+      "size_bytes": 1028207,
+      "sha256": "0ae4f6a18b7fa539cabf139a00fd7e98ba0fda1e2a7c5aa99fe0493456df7c7e"
+    },
+    {
+      "path": "GOV1",
+      "size_bytes": 1674959,
+      "sha256": "fa5c1ecf4fc1a16abd4d873f36ff196c95b3141d8cbcb5fd359b2784c20bd11b"
     },
     {
       "path": "Gemini_Generated_Image_jr8et4jr8et4jr8e.png",
@@ -70,8 +80,8 @@
     },
     {
       "path": "README.md",
-      "size_bytes": 219902,
-      "sha256": "586b10170cd83ecb9fe5d55e33b66b6665ff5df95d49cec6ce675b8819224002"
+      "size_bytes": 19071,
+      "sha256": "e54b6a651a4bc8e83d72f21411bde5fa62a79aa254989b789d2ffe050aa5b895"
     },
     {
       "path": "RESPONSE.md",
@@ -99,24 +109,59 @@
       "sha256": "a5a74ddca931dc711d6639718e86712f47d19cd672ef9c5387e21b3585a190b1"
     },
     {
+      "path": "audit.py",
+      "size_bytes": 2486,
+      "sha256": "0460f35db78cf206994be44b9b90be230b3e8ac96d170b3185c7a0413c7384d7"
+    },
+    {
       "path": "audit_check.py",
       "size_bytes": 2369,
       "sha256": "9bc6238a1edf8d72b14866f10bb32c86e3c6c4263618abc32e4ce59898b4b34a"
     },
     {
       "path": "audit_report.md",
-      "size_bytes": 3227,
-      "sha256": "4d0e99db8082bc02be6a9d39ae5fa96e3a00849761ac2244470a34bddaa6dcc0"
+      "size_bytes": 3338,
+      "sha256": "134851bb64ab9f05751c7a5876af3d8f4909d2b0e76c86d316514e11459bf066"
+    },
+    {
+      "path": "chris.py",
+      "size_bytes": 929,
+      "sha256": "eef9ff15fd339bf5e93fb8dee07a550a14cc365c46f481c1effc7003b80ae442"
     },
     {
       "path": "darpa_audit.py",
-      "size_bytes": 4994,
-      "sha256": "992dc22785f3d5ba261adba8fae702207c96944043ea3110f5e8a8ece52ba543"
+      "size_bytes": 6029,
+      "sha256": "03af9fbad39614917a87b34d23046adbe0762a423efad6a96c09cb03e57a336d"
+    },
+    {
+      "path": "darpa_audit_report.json",
+      "size_bytes": 5144,
+      "sha256": "c5ff50cdd1452e5c8fa0405ef1227903d2c35cf901927f9e60b06c162b7e85d4"
+    },
+    {
+      "path": "docs/project_prometheus_briefing.md",
+      "size_bytes": 4541,
+      "sha256": "a6420876267599e215829314e1d2f74d7c6d83d6e6bab4bb105af37ef0c7c26c"
     },
     {
       "path": "docs/recursive_identity_white_paper.md",
       "size_bytes": 4746,
       "sha256": "859dce45adef408b0675b8b55832b05c67bcfda8dae67f5a7ffa8724e903b89a"
+    },
+    {
+      "path": "docs/united_states_doctrine_of_accountability.md",
+      "size_bytes": 11204,
+      "sha256": "9bbbb46bdccc1c8854299c1411c4b309460412c74c884aac82cc9cfb991cb355"
+    },
+    {
+      "path": "file",
+      "size_bytes": 33757,
+      "sha256": "eb0b6f72f06964181a278ba50eaf6d6cc130a0fa890eac1c987e38c8a1d0b457"
+    },
+    {
+      "path": "gdsat22.5",
+      "size_bytes": 4828,
+      "sha256": "3cc6df0d935618d4036e56650d3f30ef6c3de0a5fec9b8715fbdb46f98a38988"
     },
     {
       "path": "generate_whitepaper.py",
@@ -134,14 +179,19 @@
       "sha256": "54525f722248608f615e7ebdf7be48675ac5fb2b8cefe80487b6b36d63a011bf"
     },
     {
+      "path": "tests/test_audit.py",
+      "size_bytes": 779,
+      "sha256": "e29a81fe76a36056b748af20cd85accec8f8ad0068a39e38af388c691bc5bcb6"
+    },
+    {
       "path": "tests/test_darpa_audit.py",
-      "size_bytes": 932,
-      "sha256": "154d79d07d43952812d0397accd3660fc08d9061718f70b6966e5e3793bb86db"
+      "size_bytes": 1574,
+      "sha256": "7e20424516e0f2e150306be1e78e0f21e9b03809dd12bc9d8841a6aeedfc54e8"
     },
     {
       "path": "tests/test_documents.py",
-      "size_bytes": 637,
-      "sha256": "7fe3547d5cb5ca8bc022d176e0e739e7ff0c80dfd11209d9aa52af8f4d62447d"
+      "size_bytes": 785,
+      "sha256": "1d9c3991308260d76515fb4060fd5df0b466a2d56a171a402b0ea5661336bd48"
     },
     {
       "path": "tests/test_generate_whitepaper.py",
