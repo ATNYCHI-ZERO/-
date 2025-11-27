@@ -1,41 +1,22 @@
 # DARPA Compliance Audit Summary
 
-## Repository Contents Reviewed
-- `README.md`: Whitepaper titled "pi" describing object-centered pi collapse concepts.
-
-All files in the repository have been reviewed as part of this audit.
-
-## Testing Status
-No executable code, build scripts, or automated tests are present in the repository. Consequently, there are no tests to run to verify operational status. If code or test assets are added in the future, rerun this audit to ensure compliance.
-# DARPA Audit Verification
-
 ## Repository Overview
-- Total files inspected: 1
-- Files reviewed:
-  - `README.md`
+- Mixed repository containing audit utilities (`audit.py`, `darpa_audit.py`, `audit_check.py`), PDF generation helpers (`generate_whitepaper.py`), automated tests (`tests/`), and multiple documentation artifacts under the root and `docs/` directories.
+- Current automated inventory enumerates **40 auditable files**; full digest details are captured in `darpa_audit_report.json`.
+
+## Audit Method
+- Ran `python darpa_audit.py --root . --output darpa_audit_report.json` to crawl the working tree (excluding common tooling caches) and record SHA-256 checksums, file sizes, and relative paths.
+- Report includes timestamped metadata (`generated_at`) alongside the per-file entries for traceability.
 
 ## Testing Status
-- No executable code or automated tests are present in the repository.
-- No test commands were run.
+- Executed the repository test suite via `python -m pytest`; all discovered tests passed (1 skipped due to optional dependency).
+- Audit scripts are importable and exercised by the test suite to verify hashing and reporting behaviours.
 
-## Notes
-- Repository consists solely of conceptual documentation (`README.md`).
-- No additional actions required.
-# DARPA Audit Summary
-
-## Repository Overview
-- Repository contains a single documentation file: `README.md`.
-- No executable code, configuration, or test suites are present.
-
-## Review Findings
-- `README.md` reviewed in full; contents comprise speculative research essay titled "Object-Centered Pi Collapse and Lattice Rotation as a Regenerative Mechanism".
-- No build artifacts, scripts, or binaries detected.
-
-## Testing Status
-- No automated or manual tests executed because the repository lacks runnable code or test definitions.
+## Findings
+- Audit utilities successfully enumerate repository contents and emit JSON reports without errors.
+- Documentation headers in `README.md` and key `docs/` files remain intact to support audit readiness checks.
+- No runtime issues were observed during test execution.
 
 ## Recommendations
-- Define project scope and add implementation artifacts if functionality is intended.
-- Introduce reproducible testing strategy once executable components exist.
-
-*Audit completed on 2025-11-11T01:18:29Z.*
+- Regenerate `darpa_audit_report.json` after material repository changes to keep the inventory in sync.
+- Continue running `python -m pytest` before audits to ensure helper scripts remain operational.
